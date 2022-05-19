@@ -1,16 +1,16 @@
 import os
 import glob
-import scipy
-import torch
 import random
+
 import numpy as np
-import torchvision.transforms.functional as F
-from torch.utils.data import DataLoader
 from PIL import Image
-from scipy.misc import imread
 from skimage.feature import canny
 from skimage.color import rgb2gray, gray2rgb
-from .utils import create_mask
+import torch
+from torch.utils.data import DataLoader
+import torchvision.transforms.functional as F
+
+from .utils import create_mask, imread, imresize
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -146,7 +146,7 @@ class Dataset(torch.utils.data.Dataset):
         if mask_type == 6:
             mask = imread(self.mask_data[index])
             mask = self.resize(mask, imgh, imgw, centerCrop=False)
-            mask = rgb2gray(mask)
+            mask = rgb2gray(mask) if len(mask.shape) == 3 else mask
             mask = (mask > 0).astype(np.uint8) * 255
             return mask
 
@@ -165,7 +165,7 @@ class Dataset(torch.utils.data.Dataset):
             i = (imgw - side) // 2
             img = img[j:j + side, i:i + side, ...]
 
-        img = scipy.misc.imresize(img, [height, width])
+        img = imresize(img, height, width)
 
         return img
 

@@ -53,6 +53,32 @@ def imsave(img, path):
     im.save(path)
 
 
+def imread(path):
+    """
+    Reads an image from a file.
+    Args:
+        path (str): path to file
+    Returns:
+        numpy.ndarray: image
+    """
+    return np.array(Image.open(path))
+
+
+def imresize(old_image: np.ndarray, height, width):
+    """
+    Resizes an image.
+    Args:
+        img (numpy.ndarray): image
+        height (int): height
+        width (int): width
+    Returns:
+        numpy.ndarray: resized image
+    """
+    im = Image.fromarray(old_image)
+    new_image = np.array(im.resize((height, width), Image.BICUBIC))
+    return new_image
+
+
 class Progbar(object):
     """Displays a progress bar.
 
