@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from .networks import InpaintGenerator, EdgeGenerator, Discriminator
 from .loss import AdversarialLoss, PerceptualLoss, StyleLoss
-
+from skimage.color import rgb2gray, gray2rgb, rgba2rgb
 
 class BaseModel(nn.Module):
     def __init__(self, name, config):

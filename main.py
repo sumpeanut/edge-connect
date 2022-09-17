@@ -7,6 +7,7 @@ import argparse
 from shutil import copyfile
 from src.config import Config
 from src.edge_connect import EdgeConnect
+from src.utils import imread
 
 
 def main(mode=None):
@@ -42,28 +43,14 @@ def main(mode=None):
     np.random.seed(config.SEED)
     random.seed(config.SEED)
 
-
+    img = imread('examples/places2/images/places2_01.png')
+    mask = imread('examples/places2/masks/places2_01.png')
 
     # build the model and initialize
-    model = EdgeConnect(config)
+    model = EdgeConnect(config, img, mask)
     model.load()
-
-
-    # model training
-    if config.MODE == 1:
-        config.print()
-        print('\nstart training...\n')
-        model.train()
-
-    # model test
-    elif config.MODE == 2:
-        print('\nstart testing...\n')
-        model.test()
-
-    # eval mode
-    else:
-        print('\nstart eval...\n')
-        model.eval()
+    print('\nstart testing...\n')
+    model.test()
 
 
 def load_config(mode=None):

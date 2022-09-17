@@ -5,12 +5,12 @@ import random
 import numpy as np
 from PIL import Image
 from skimage.feature import canny
-from skimage.color import rgb2gray, gray2rgb
+from skimage.color import rgb2gray, gray2rgb, rgba2rgb
 import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms.functional as F
 
-from .utils import create_mask, imread, imresize
+from .utils import create_mask, imread, imresize, imsave
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -18,9 +18,9 @@ class Dataset(torch.utils.data.Dataset):
         super(Dataset, self).__init__()
         self.augment = augment
         self.training = training
-        self.data = self.load_flist(flist)
-        self.edge_data = self.load_flist(edge_flist)
-        self.mask_data = self.load_flist(mask_flist)
+        self.data = flist
+        self.edge_data = edge_flist
+        self.mask_data = mask_flist
 
         self.input_size = config.INPUT_SIZE
         self.sigma = config.SIGMA
@@ -54,8 +54,8 @@ class Dataset(torch.utils.data.Dataset):
         size = self.input_size
 
         # load image
-        img = imread(self.data[index])
-
+        img = self.data[index]
+        
         # gray to rgb
         if len(img.shape) < 3:
             img = gray2rgb(img)
@@ -65,7 +65,7 @@ class Dataset(torch.utils.data.Dataset):
             img = self.resize(img, size, size)
 
         # create grayscale image
-        img_gray = rgb2gray(img)
+        img_gray = rgb2gray( img )
 
         # load mask
         mask = self.load_mask(img, index)
@@ -104,7 +104,7 @@ class Dataset(torch.utils.data.Dataset):
         # external
         else:
             imgh, imgw = img.shape[0:2]
-            edge = imread(self.edge_data[index])
+            edge = self.edge_data[index]
             edge = self.resize(edge, imgh, imgw)
 
             # non-max suppression
@@ -137,14 +137,14 @@ class Dataset(torch.utils.data.Dataset):
         # external
         if mask_type == 3:
             mask_index = random.randint(0, len(self.mask_data) - 1)
-            mask = imread(self.mask_data[mask_index])
+            mask = self.mask_data[mask_index]
             mask = self.resize(mask, imgh, imgw)
             mask = (mask > 0).astype(np.uint8) * 255       # threshold due to interpolation
             return mask
 
         # test mode: load mask non random
         if mask_type == 6:
-            mask = imread(self.mask_data[index])
+            mask = self.mask_data[index]
             mask = self.resize(mask, imgh, imgw, centerCrop=False)
             mask = rgb2gray(mask) if len(mask.shape) == 3 else mask
             mask = (mask > 0).astype(np.uint8) * 255
